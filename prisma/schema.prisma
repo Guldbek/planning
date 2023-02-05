@@ -1,23 +1,42 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-datasource db {
-  provider = "postgres"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-model Post {
-  id    String @id @default(uuid())
-  title String
-  text  String
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-  // To return `Date`s intact through the API we use transformers
-  // https://trpc.io/docs/data-transformers
-  // This is unique so it can be used for cursor-based pagination
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+model Project {
+  id             Int                    @id @default(autoincrement())
+  name           String
+  resources      Resource[]
+  startIntervals ProjectStartInterval[]
+}
+
+model ProjectStartInterval {
+  id        Int      @id @default(autoincrement())
+  Project   Project? @relation(fields: [projectId], references: [id])
+  projectId Int?
+  startDate DateTime @db.Timestamp(3)
+  endDate   DateTime @db.Timestamp(3)
+}
+
+model Resource {
+  id             Int                     @id @default(autoincrement())
+  Project        Project?                @relation(fields: [projectId], references: [id])
+  projectId      Int?
+  name           String
+  startIntervals ResourceStartInterval[]
+}
+
+model ResourceStartInterval {
+  id         Int       @id @default(autoincrement())
+  Resource   Resource? @relation(fields: [resourceId], references: [id])
+  resourceId Int?
+  startDate  DateTime  @db.Timestamp(3)
+  endDate    DateTime  @db.Timestamp(3)
 }

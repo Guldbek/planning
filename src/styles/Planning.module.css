@@ -1,0 +1,3 @@
+.date {
+  @apply inline-block p-1 text-center border-r-2
+}

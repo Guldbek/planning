@@ -1,0 +1,8 @@
+.toolTip {
+  position: absolute;
+  top: -45px;
+  background-color: black;
+  color: white;
+  width: 75px;
+  @apply rounded-md p-2 text-center z-10
+}
