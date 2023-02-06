@@ -6,13 +6,16 @@ import {
   checkIfDateExistsInIntervals,
   fromBookingIntervals,
 } from '../helpers/intervalFromDates';
-import type { Project as ProjectType } from '@prisma/client';
-import Resource from './_resource';
-import Day from './_day';
-import { useEffect, useState } from 'react';
+import { AddResource } from './_addResource';
+import { useState } from 'react';
 import { dbInterval, useBooking } from '~/hooks/useBooking';
 import { IntervalBooking } from './_interval';
 import { trpc } from '~/utils/trpc';
+import Resource from './_resource';
+import Day from './_day';
+
+import type { Project as ProjectType } from '@prisma/client';
+import type { Resource } from '@prisma/client';
 
 type PropsType = {
   weeks: any;
@@ -26,6 +29,7 @@ export default function Project(props: PropsType) {
 
   const [showResources, setShowResources] = useState<boolean>(false);
   const [intervals, setIntervals] = useState<dbInterval[]>();
+  const [resources, setResources] = useState<Resource[]>();
 
   const { loading } = trpc.projectStartInterval.list.useQuery(
     { projectId: project.id },
@@ -37,6 +41,16 @@ export default function Project(props: PropsType) {
       },
     },
   );
+
+  const { loading: resourceLoading } = trpc.resource.list.useQuery(
+    { projectId: project.id },
+    {
+      onSuccess(data) {
+        setResources(data.items);
+      },
+    },
+  );
+
   const mutation = trpc.projectStartInterval.add.useMutation();
 
   function wrapperProjectInterval(intervalData) {
@@ -47,24 +61,13 @@ export default function Project(props: PropsType) {
     });
   }
 
-  function wrapperDeleteProjectInterval(id: string | number) {
-    deleteProjectInterval({
-      variables: { id: Number(id) },
-    });
-  }
-
   const [
     bookingEnabled,
     bookingInterval,
     onClickBookingStart,
     onHoverBooking,
     onClickBookingEnd,
-  ] = useBooking(
-    wrapperProjectInterval,
-    wrapperDeleteProjectInterval,
-    setIntervals,
-    intervals,
-  );
+  ] = useBooking(wrapperProjectInterval, setIntervals, intervals);
 
   return (
     <>
@@ -82,11 +85,11 @@ export default function Project(props: PropsType) {
           </button>
         </div>
         <div className="w-4/5 flex flex-row border-b-2 border-t-4 relative">
-          {intervals?.map((interval) => (
+          {intervals?.map((interval, index) => (
             <IntervalBooking
+              key={index}
               dayWidth={dayWidth}
               viewDate={viewDate}
-              wrapperDeleteProjectInterval={wrapperDeleteProjectInterval}
               interval={interval}
             />
           ))}
@@ -128,15 +131,19 @@ export default function Project(props: PropsType) {
             ))}
         </div>
       </div>
-      {/* {showResources &&
-        resources.map((resource) => (
+
+      {showResources &&
+        resources.map((resource, index) => (
           <Resource
+            key={index}
             resource={resource}
             dayWidth={dayWidth}
             weeks={weeks}
             project={project}
+            viewDate={viewDate}
           />
-        ))} */}
+        ))}
+      {showResources && <AddResource />}
     </>
   );
 }

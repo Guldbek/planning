@@ -16,7 +16,6 @@ export type dbInterval = {
 
 export function useBooking(
   callbackSaveInterval,
-  callbackDeleteInterval,
   setIntervals,
   intervals: dbInterval[],
 ) {

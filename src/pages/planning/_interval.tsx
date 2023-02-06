@@ -17,12 +17,12 @@ export function IntervalBooking({
   viewDate,
   interval: dbInterval,
   dayWidth,
-  wrapperDeleteProjectInterval,
 }: Props) {
   const [interval, setInterval] = useState<Interval>(dbInterval.interval);
   const diff = interval.start.diff(viewDate, 'days');
 
   const [expand, setExpand] = useState<boolean>();
+  const [tooltip, setTooltip] = useState<boolean>(false);
 
   const diffDays = diff.days;
   const intervalNode = useRef(null);
@@ -31,12 +31,12 @@ export function IntervalBooking({
     ev.stopPropagation();
     setExpand(true);
 
-    let initialBottomValue = intervalNode.current.getBoundingClientRect().right;
-    let mouseValue = ev.clientX;
+    const initialBottomValue =
+      intervalNode.current.getBoundingClientRect().right;
+    const mouseValue = ev.clientX;
 
-    let daysToAdd = Math.ceil((mouseValue - initialBottomValue) / dayWidth);
+    const daysToAdd = Math.ceil((mouseValue - initialBottomValue) / dayWidth);
 
-    console.log(daysToAdd);
     setInterval(
       interval.set({
         end: interval.end.plus({ days: daysToAdd }),
@@ -46,10 +46,28 @@ export function IntervalBooking({
 
   return (
     <>
+      {tooltip && (
+        <div
+          className="absolute bg-slate-200 rounded-md"
+          style={{
+            left: `${
+              diffDays * dayWidth +
+              (interval.count('days') * dayWidth) / 2 -
+              150
+            }px`,
+            top: 65,
+            zIndex: '1',
+            width: 300,
+            height: 200,
+          }}
+        >
+          i am tooltip
+        </div>
+      )}
       <div
         ref={intervalNode}
         className="interval absolute bg-cyan-400 border-r-2 h-14 mt-1 flex justify-between"
-        // onClick={() => wrapperDeleteProjectInterval(interval.id)}
+        onClick={() => setTooltip(!tooltip)}
         style={{
           left: `${diffDays * dayWidth}px`,
           width: `${interval.count('days') * dayWidth}px`,

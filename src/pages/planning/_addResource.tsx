@@ -8,5 +8,10 @@ type Props = {
 };
 
 export function AddResource({ project }) {
-  return <></>;
+  return (
+    <div className="w-1/5">
+      <input type="text" className="w-3/5" />
+      <input type="button" value="Add" className="w-2/5" />
+    </div>
+  );
 }
