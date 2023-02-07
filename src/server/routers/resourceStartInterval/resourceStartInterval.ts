@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  *
  * This is an example router, you can delete this file and then update `../pages/api/trpc/[trpc].tsx`
@@ -16,7 +17,7 @@ import { prisma } from '~/server/prisma';
 const defaultResourceStartIntervalSelect =
   Prisma.validator<Prisma.ResourceStartIntervalSelect>()({
     id: true,
-    resourceId: true,
+    projectResourceId: true,
     endDate: true,
     startDate: true,
   });
@@ -25,14 +26,14 @@ export const resourceStartIntervalRouter = router({
   list: publicProcedure
     .input(
       z.object({
-        resourceId: z.number(),
+        projectResourceId: z.number(),
       }),
     )
     .query(async ({ input }) => {
       const items = await prisma.resourceStartInterval.findMany({
         select: defaultResourceStartIntervalSelect,
         where: {
-          resourceId: input.resourceId,
+          projectResourceId: input.projectResourceId,
         },
       });
 
@@ -43,7 +44,7 @@ export const resourceStartIntervalRouter = router({
   add: publicProcedure
     .input(
       z.object({
-        resourceId: z.number(),
+        projectResourceId: z.number(),
         startDate: z.date(),
         endDate: z.date(),
       }),
@@ -53,7 +54,28 @@ export const resourceStartIntervalRouter = router({
         data: {
           startDate: input.startDate,
           endDate: input.endDate,
-          resourceId: input.resourceId,
+          projectResourceId: input.projectResourceId,
+        },
+        select: defaultResourceStartIntervalSelect,
+      });
+      return project;
+    }),
+update: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        startDate: z.date(),
+        endDate: z.date(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const project = await prisma.resourceStartInterval.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          startDate: input.startDate,
+          endDate: input.endDate,
         },
         select: defaultResourceStartIntervalSelect,
       });

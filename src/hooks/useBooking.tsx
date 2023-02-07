@@ -56,12 +56,17 @@ export function useBooking(
 
   function onClickBookingEnd(day: DateTime) {
     const newInterval = createObjectInterval(selectedStartBookingDay, day);
+    const interval = fromBookingIntervals(newInterval);
 
     callbackSaveInterval({
       ...newInterval,
     });
 
-    const interval = fromBookingIntervals(newInterval);
+    // intervals
+    //   .filter((dbInterval) => dbInterval.interval.overlaps(interval.interval))
+    //   .map((overlappingIntervals) =>
+    //     console.log('delete interval' + overlappingIntervals.id),
+    //   );
 
     setIntervals([...intervals, interval]);
     setBookingEnabled(false);

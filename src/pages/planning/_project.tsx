@@ -11,10 +11,15 @@ import { useState } from 'react';
 import { dbInterval, useBooking } from '~/hooks/useBooking';
 import { IntervalBooking } from './_interval';
 import { trpc } from '~/utils/trpc';
+import { toast } from 'react-toastify';
 import Resource from './_resource';
 import Day from './_day';
 
-import type { Project as ProjectType } from '@prisma/client';
+import type {
+  Project as ProjectType,
+  ProjectResource,
+  ProjectStartInterval,
+} from '@prisma/client';
 import type { Resource } from '@prisma/client';
 
 type PropsType = {
@@ -29,9 +34,9 @@ export default function Project(props: PropsType) {
 
   const [showResources, setShowResources] = useState<boolean>(false);
   const [intervals, setIntervals] = useState<dbInterval[]>();
-  const [resources, setResources] = useState<Resource[]>();
+  const [projectResources, setProjectResources] = useState<ProjectResource[]>();
 
-  const { loading } = trpc.projectStartInterval.list.useQuery(
+  trpc.projectStartInterval.list.useQuery(
     { projectId: project.id },
     {
       onSuccess(data) {
@@ -42,23 +47,53 @@ export default function Project(props: PropsType) {
     },
   );
 
-  const { loading: resourceLoading } = trpc.resource.list.useQuery(
-    { projectId: project.id },
-    {
-      onSuccess(data) {
-        setResources(data.items);
+  const projectIntervalMutation =
+    trpc.projectStartInterval.update.useMutation();
+  const utils = trpc.useContext();
+
+  const updateProjectStartInterval = (
+    projectStartInterval: ProjectStartInterval,
+  ) => {
+    projectIntervalMutation.mutate(
+      {
+        id: projectStartInterval.id,
+        startDate: projectStartInterval.startDate,
+        endDate: projectStartInterval.endDate,
       },
-    },
-  );
+      {
+        onSuccess: () => {
+          utils.projectStartInterval.list.refetch({ projectId: project.id });
+          toast.success('Opdaterede booking');
+        },
+      },
+    );
+  };
+
+  const { loading: resourceLoading, refetch: refetchProjectResources } =
+    trpc.projectResource.list.useQuery(
+      { projectId: project.id },
+      {
+        onSuccess(data) {
+          setProjectResources(data.items);
+        },
+      },
+    );
 
   const mutation = trpc.projectStartInterval.add.useMutation();
 
   function wrapperProjectInterval(intervalData) {
-    mutation.mutate({
-      projectId: project.id,
-      startDate: intervalData.startDate,
-      endDate: intervalData.endDate,
-    });
+    mutation.mutate(
+      {
+        projectId: project.id,
+        startDate: intervalData.startDate,
+        endDate: intervalData.endDate,
+      },
+      {
+        onSuccess: () => {
+          utils.projectStartInterval.list.refetch({ projectId: project.id });
+        },
+      },
+    );
   }
 
   const [
@@ -72,7 +107,7 @@ export default function Project(props: PropsType) {
   return (
     <>
       <div className="flex flex-row hover:bg-zinc-100">
-        <div className="w-1/5 border-r-4 border-b-2 border-t-4 p-2 flex justify-between z-10 bg-white">
+        <div className="w-1/5 border-r-4 border-b-2 border-t-4 p-2 flex justify-between z-10 bg-white items-center">
           <div>
             {project.name}
             <p className="text-xs"></p>
@@ -91,6 +126,7 @@ export default function Project(props: PropsType) {
               dayWidth={dayWidth}
               viewDate={viewDate}
               interval={interval}
+              updateInterval={updateProjectStartInterval}
             />
           ))}
 
@@ -133,7 +169,7 @@ export default function Project(props: PropsType) {
       </div>
 
       {showResources &&
-        resources.map((resource, index) => (
+        projectResources.map((resource, index) => (
           <Resource
             key={index}
             resource={resource}
@@ -143,7 +179,13 @@ export default function Project(props: PropsType) {
             viewDate={viewDate}
           />
         ))}
-      {showResources && <AddResource />}
+      {showResources && (
+        <AddResource
+          project={project}
+          refetchProjectResources={refetchProjectResources}
+          projectResources={projectResources}
+        />
+      )}
     </>
   );
 }

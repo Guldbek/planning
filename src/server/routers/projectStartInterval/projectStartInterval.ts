@@ -34,10 +34,13 @@ export const projectStartIntervalRouter = router({
         where: {
           projectId: input.projectId,
         },
+        orderBy: {
+          id: 'asc',
+        },
       });
 
       return {
-        items: items.reverse(),
+        items: items,
       };
     }),
   add: publicProcedure
@@ -54,6 +57,27 @@ export const projectStartIntervalRouter = router({
           startDate: input.startDate,
           endDate: input.endDate,
           projectId: input.projectId,
+        },
+        select: defaultProjectStartIntervalSelect,
+      });
+      return project;
+    }),
+  update: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        startDate: z.date(),
+        endDate: z.date(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const project = await prisma.projectStartInterval.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          startDate: input.startDate,
+          endDate: input.endDate,
         },
         select: defaultProjectStartIntervalSelect,
       });

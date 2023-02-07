@@ -22,10 +22,13 @@ export const projectRouter = router({
   list: publicProcedure.query(async () => {
     const items = await prisma.project.findMany({
       select: defaultProjectSelect,
+      orderBy: {
+        id: 'asc',
+      },
     });
 
     return {
-      items: items.reverse(),
+      items: items,
     };
   }),
   add: publicProcedure

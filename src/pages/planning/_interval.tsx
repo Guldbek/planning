@@ -5,24 +5,31 @@ import type { dbInterval } from '@/hooks/useBooking';
 import { DateTime, Interval } from 'luxon';
 import { useRef, useState } from 'react';
 import styles from '~/styles/Interval.module.css';
+import { trpc } from '~/utils/trpc';
 
 type Props = {
   viewDate: DateTime;
   interval: dbInterval;
   dayWidth: number;
   wrapperDeleteProjectInterval: any;
+  updateInterval: void;
 };
 
 export function IntervalBooking({
   viewDate,
   interval: dbInterval,
   dayWidth,
+  updateInterval,
 }: Props) {
   const [interval, setInterval] = useState<Interval>(dbInterval.interval);
   const diff = interval.start.diff(viewDate, 'days');
 
   const [expand, setExpand] = useState<boolean>();
   const [tooltip, setTooltip] = useState<boolean>(false);
+  const [mouseValue, setMouseValue] = useState<number>(0);
+  const [startInterval, setStartInterval] = useState<Interval>(
+    dbInterval.interval,
+  );
 
   const diffDays = diff.days;
   const intervalNode = useRef(null);
@@ -31,17 +38,49 @@ export function IntervalBooking({
     ev.stopPropagation();
     setExpand(true);
 
-    const initialBottomValue =
-      intervalNode.current.getBoundingClientRect().right;
-    const mouseValue = ev.clientX;
+    if (ev.screenX === 0) {
+      return;
+    }
 
-    const daysToAdd = Math.ceil((mouseValue - initialBottomValue) / dayWidth);
+    const daysToAdd = Math.ceil((ev.clientX - mouseValue) / dayWidth);
 
     setInterval(
-      interval.set({
-        end: interval.end.plus({ days: daysToAdd }),
-      }),
+      Interval.fromDateTimes(
+        startInterval.start,
+        startInterval.end.plus({ days: daysToAdd }),
+      ),
     );
+  };
+
+  const moveInterval = (ev: DragEvent<HTMLDivElement>) => {
+    const daysToAdd = Math.ceil((ev.clientX - mouseValue) / dayWidth);
+
+    if (ev.screenX === 0) {
+      return;
+    }
+
+    setInterval(
+      Interval.fromDateTimes(
+        startInterval.start.plus({ days: daysToAdd }),
+        startInterval.end.plus({ days: daysToAdd }),
+      ),
+    );
+  };
+
+  const startExtendInterval = (ev: DragEvent<HTMLDivElement>) => {
+    setMouseValue(ev.clientX);
+    const blankCanvas = document.createElement('canvas');
+    ev.dataTransfer.setDragImage(blankCanvas, 0, 0);
+  };
+
+  const endExtendInterval = (ev: DragEvent<HTMLDivElement>) => {
+    setMouseValue(0);
+    setStartInterval(interval);
+    updateInterval({
+      id: dbInterval.id,
+      startDate: interval.start.toJSDate(),
+      endDate: interval.end.toJSDate(),
+    });
   };
 
   return (
@@ -56,7 +95,7 @@ export function IntervalBooking({
               150
             }px`,
             top: 65,
-            zIndex: '1',
+            zIndex: '400',
             width: 300,
             height: 200,
           }}
@@ -66,7 +105,15 @@ export function IntervalBooking({
       )}
       <div
         ref={intervalNode}
-        className="interval absolute bg-cyan-400 border-r-2 h-14 mt-1 flex justify-between"
+        draggable="true"
+        onDragStart={startExtendInterval}
+        onDragEnd={endExtendInterval}
+        onDrag={moveInterval}
+        className={`interval absolute border-r-2 h-14 mt-1 flex justify-between ${
+          mouseValue != 0
+            ? 'cursor-grabbing bg-cyan-300'
+            : 'cursor-grab bg-cyan-400'
+        }`}
         onClick={() => setTooltip(!tooltip)}
         style={{
           left: `${diffDays * dayWidth}px`,
@@ -78,7 +125,9 @@ export function IntervalBooking({
         <div
           draggable="true"
           className={styles.resizeInterval}
-          onDragStart={extendInterval}
+          onDragStart={startExtendInterval}
+          onDragEnd={endExtendInterval}
+          onDrag={extendInterval}
         ></div>
       </div>
     </>

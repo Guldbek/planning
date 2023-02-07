@@ -11,10 +11,10 @@ datasource db {
 }
 
 model Project {
-  id             Int                    @id @default(autoincrement())
-  name           String
-  resources      Resource[]
-  startIntervals ProjectStartInterval[]
+  id               Int                    @id @default(autoincrement())
+  name             String
+  startIntervals   ProjectStartInterval[]
+  ProjectResources ProjectResource[]
 }
 
 model ProjectStartInterval {
@@ -25,18 +25,25 @@ model ProjectStartInterval {
   endDate   DateTime @db.Timestamp(3)
 }
 
-model Resource {
+model ProjectResource {
   id             Int                     @id @default(autoincrement())
   Project        Project?                @relation(fields: [projectId], references: [id])
   projectId      Int?
-  name           String
+  Resource       Resource?               @relation(fields: [resourceId], references: [id])
+  resourceId     Int?
   startIntervals ResourceStartInterval[]
 }
 
+model Resource {
+  id              Int               @id @default(autoincrement())
+  name            String
+  ProjectResource ProjectResource[]
+}
+
 model ResourceStartInterval {
-  id         Int       @id @default(autoincrement())
-  Resource   Resource? @relation(fields: [resourceId], references: [id])
-  resourceId Int?
-  startDate  DateTime  @db.Timestamp(3)
-  endDate    DateTime  @db.Timestamp(3)
+  id                Int              @id @default(autoincrement())
+  ProjectResource   ProjectResource? @relation(fields: [projectResourceId], references: [id])
+  projectResourceId Int?
+  startDate         DateTime         @db.Timestamp(3)
+  endDate           DateTime         @db.Timestamp(3)
 }

@@ -9,7 +9,6 @@ import { trpc } from '~/utils/trpc';
 
 export default function Planning() {
   const { data, isLoading: loading } = trpc.project.list.useQuery();
-  // const { data, loading, error } = useQuery(AllProjectsQuery);
   const [startDate, setStartDate] = useState<DateTime>(
     DateTime.now().startOf('week'),
   );
@@ -19,7 +18,6 @@ export default function Planning() {
   const interval = Interval.fromDateTimes(startDate, later);
 
   if (loading) return <p>Loading...</p>;
-  // if (error) return <p>Oh no... {error.message}</p>;
 
   const weeks = intervalFromDates(interval).weeks();
 
