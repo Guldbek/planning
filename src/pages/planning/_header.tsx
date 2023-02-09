@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-
+import NavigateNextSharpIcon from '@mui/icons-material/NavigateNextSharp';
+import NavigateBeforeSharpIcon from '@mui/icons-material/NavigateBeforeSharp';
+import ZoomInSharpIcon from '@mui/icons-material/ZoomInSharp';
+import ZoomOutSharpIcon from '@mui/icons-material/ZoomOutSharp';
 import { DateTime } from 'luxon';
 
 export default function Header(props) {
@@ -15,14 +18,14 @@ export default function Header(props) {
             type="button"
             className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"
           >
-            Zoom ud
+            <ZoomOutSharpIcon />
           </button>
           <button
             onClick={() => setDayWidth(48)}
             type="button"
             className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"
           >
-            Zoom ind
+            <ZoomInSharpIcon />
           </button>
         </div>
         <div className="inline-flex shadow-sm" role="group">
@@ -31,7 +34,7 @@ export default function Header(props) {
             type="button"
             className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"
           >
-            En uge tilbage
+            <NavigateBeforeSharpIcon />
           </button>
           <button
             onClick={() => setStartDate(DateTime.now().startOf('week'))}
@@ -45,7 +48,7 @@ export default function Header(props) {
             type="button"
             className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"
           >
-            En uge frem
+            <NavigateNextSharpIcon />
           </button>
         </div>
       </div>
@@ -66,11 +69,14 @@ export default function Header(props) {
                   <div>{week.monthNames}</div>
                   <div></div>
                 </div>
-                <div className="flex flex-row mt-2">
+                <div
+                  className="inline-block"
+                  style={{ width: dayWidth * week.days.length + 'px' }}
+                >
                   {week.days.map((day, index) => (
                     <div
                       key={index}
-                      className={`text-center text-xs border-r-2 ${
+                      className={`text-center text-xs border-r-2 inline-block h-6 pt-1 ${
                         day.weekday > 5 ? 'bg-slate-300' : ''
                       }`}
                       style={{ width: dayWidth }}

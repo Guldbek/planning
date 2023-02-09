@@ -8,6 +8,7 @@ import {
   createObjectInterval,
 } from '~/pages/helpers/intervalFromDates';
 import type { BookingInterval } from '~/pages/helpers/intervalFromDates';
+import { toast } from 'react-toastify';
 
 export type dbInterval = {
   id: string;
@@ -68,6 +69,7 @@ export function useBooking(
     //     console.log('delete interval' + overlappingIntervals.id),
     //   );
 
+    toast.success('Ny booking tilføjet');
     setIntervals([...intervals, interval]);
     setBookingEnabled(false);
     setBookingInterval(null);

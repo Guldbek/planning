@@ -27,10 +27,10 @@ model ProjectStartInterval {
 
 model ProjectResource {
   id             Int                     @id @default(autoincrement())
-  Project        Project?                @relation(fields: [projectId], references: [id])
-  projectId      Int?
-  Resource       Resource?               @relation(fields: [resourceId], references: [id])
-  resourceId     Int?
+  Project        Project                 @relation(fields: [projectId], references: [id])
+  projectId      Int
+  Resource       Resource                @relation(fields: [resourceId], references: [id])
+  resourceId     Int
   startIntervals ResourceStartInterval[]
 }
 
@@ -43,7 +43,7 @@ model Resource {
 model ResourceStartInterval {
   id                Int              @id @default(autoincrement())
   ProjectResource   ProjectResource? @relation(fields: [projectResourceId], references: [id])
-  projectResourceId Int?
+  projectResourceId Int
   startDate         DateTime         @db.Timestamp(3)
   endDate           DateTime         @db.Timestamp(3)
 }

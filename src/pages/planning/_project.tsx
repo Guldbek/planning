@@ -14,6 +14,8 @@ import { trpc } from '~/utils/trpc';
 import { toast } from 'react-toastify';
 import Resource from './_resource';
 import Day from './_day';
+import ExpandMoreSharpIcon from '@mui/icons-material/ExpandMoreSharp';
+import ExpandLessSharpIcon from '@mui/icons-material/ExpandLessSharp';
 
 import type {
   Project as ProjectType,
@@ -69,7 +71,7 @@ export default function Project(props: PropsType) {
     );
   };
 
-  const { loading: resourceLoading, refetch: refetchProjectResources } =
+  const { refetch: refetchProjectResources } =
     trpc.projectResource.list.useQuery(
       { projectId: project.id },
       {
@@ -116,7 +118,7 @@ export default function Project(props: PropsType) {
             onClick={() => setShowResources(!showResources)}
             className="cursor-pointer"
           >
-            Udvid
+            {showResources ? <ExpandLessSharpIcon /> : <ExpandMoreSharpIcon />}
           </button>
         </div>
         <div className="w-4/5 flex flex-row border-b-2 border-t-4 relative">
@@ -127,6 +129,7 @@ export default function Project(props: PropsType) {
               viewDate={viewDate}
               interval={interval}
               updateInterval={updateProjectStartInterval}
+              color={'bg-cyan-400'}
             />
           ))}
 
@@ -146,7 +149,7 @@ export default function Project(props: PropsType) {
                       onClickBookingEnd={onClickBookingEnd}
                       bookingEnabled={bookingEnabled}
                       index={index}
-                      color={'bg-cyan-500'}
+                      color={'bg-cyan-400'}
                       dateTime={day}
                       dayWidth={dayWidth}
                       isInInterval={

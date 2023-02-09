@@ -5,9 +5,9 @@
  */
 import { router, publicProcedure } from '~/server/trpc';
 import { Prisma } from '@prisma/client';
-import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { prisma } from '~/server/prisma';
+import { DateTime, Interval } from 'luxon';
 
 /**
  * Default selector for Post.
@@ -69,7 +69,7 @@ update: publicProcedure
       }),
     )
     .mutation(async ({ input }) => {
-      const project = await prisma.resourceStartInterval.update({
+      const resourceStartInterval = await prisma.resourceStartInterval.update({
         where: {
           id: input.id,
         },
@@ -79,6 +79,48 @@ update: publicProcedure
         },
         select: defaultResourceStartIntervalSelect,
       });
-      return project;
+      await resourceIsDoubleBooked(resourceStartInterval.projectResourceId)
+
+      return resourceStartInterval;
     }),
 });
+
+async function resourceIsDoubleBooked(projectResourceId: number){
+  // get resource id from projectResource
+  const projectResource = await prisma.projectResource.findFirst({
+    select: { resourceId: true },
+    where: {
+      id: projectResourceId 
+    }
+  })
+
+  const projectResources = await prisma.projectResource.findMany({
+    where: {
+      resourceId: projectResource?.resourceId
+    },
+    include: {
+      startIntervals: true
+    }
+  })
+  
+  // look at projectResources by resourceId
+  // fetch all start interval by projectResourceId
+  const startIntervals = projectResources.map((projectResource) => {
+    return projectResource.startIntervals
+  })
+
+  // get all start - end dates
+  // transform into date time intervals.
+  const computedStartIntervals = startIntervals.flat().map((startInterval) => {
+    const startDate = DateTime.fromJSDate(startInterval.startDate)
+    const endDate = DateTime.fromJSDate(startInterval.endDate)
+
+    return Interval.fromDateTimes(startDate, endDate)
+  });
+
+  // const computedDateTimes = computedStartIntervals.map((computedStartInterval) => {
+
+  // })
+
+  console.log(computedStartIntervals)
+}

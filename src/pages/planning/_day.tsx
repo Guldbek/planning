@@ -67,7 +67,7 @@ export default function Day(props: PropsType) {
         onMouseEnter={() => onHoverHandler()}
         onMouseLeave={() => setShowToolTip(false)}
         className={`cursor-pointer h-16 text-center border-r-2 ${
-          isInBookingInterval ? 'bg-cyan-400' : ''
+          isInBookingInterval ? color : ''
         }`}
         style={{ width: dayWidth }}
       ></div>

@@ -106,6 +106,7 @@ export default function Resource(props: PropsType) {
               viewDate={viewDate}
               interval={interval}
               updateInterval={updateResourceStartInterval}
+              color={'bg-rose-400'}
             />
           ))}
           {weeks &&
@@ -124,7 +125,7 @@ export default function Resource(props: PropsType) {
                       onClickBookingEnd={onClickBookingEnd}
                       bookingEnabled={bookingEnabled}
                       index={index}
-                      color={'bg-cyan-400'}
+                      color={'bg-rose-400'}
                       dateTime={day}
                       dayWidth={dayWidth}
                       isInInterval={

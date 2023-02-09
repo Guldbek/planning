@@ -3,6 +3,6 @@
 }
 
 .resizeInterval {
-  @apply cursor-col-resize resize h-14 w-2 bg-transparent;
+  @apply cursor-col-resize resize bg-transparent items-center flex text-white;
 
 }

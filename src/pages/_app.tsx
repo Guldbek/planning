@@ -4,8 +4,6 @@ import type { ReactElement, ReactNode } from 'react';
 import { DefaultLayout } from '~/components/DefaultLayout';
 import { trpc } from '~/utils/trpc';
 import '~/styles/globals.css';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 export type NextPageWithLayout<
   TProps = Record<string, unknown>,
@@ -20,25 +18,7 @@ type AppPropsWithLayout = AppProps & {
 
 const MyApp = (({ Component, pageProps }: AppPropsWithLayout) => {
   const getLayout =
-    Component.getLayout ??
-    ((page) => (
-      <DefaultLayout>
-        {' '}
-        <ToastContainer
-          position="top-right"
-          autoClose={4999}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-        {page}
-      </DefaultLayout>
-    ));
+    Component.getLayout ?? ((page) => <DefaultLayout>{page}</DefaultLayout>);
 
   return getLayout(<Component {...pageProps} />);
 }) as AppType;

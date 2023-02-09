@@ -6,6 +6,7 @@ import { DateTime, Interval } from 'luxon';
 import { useRef, useState } from 'react';
 import styles from '~/styles/Interval.module.css';
 import { trpc } from '~/utils/trpc';
+import MoreVertSharpIcon from '@mui/icons-material/MoreVertSharp';
 
 type Props = {
   viewDate: DateTime;
@@ -13,6 +14,7 @@ type Props = {
   dayWidth: number;
   wrapperDeleteProjectInterval: any;
   updateInterval: void;
+  color: string;
 };
 
 export function IntervalBooking({
@@ -20,6 +22,7 @@ export function IntervalBooking({
   interval: dbInterval,
   dayWidth,
   updateInterval,
+  color,
 }: Props) {
   const [interval, setInterval] = useState<Interval>(dbInterval.interval);
   const diff = interval.start.diff(viewDate, 'days');
@@ -109,10 +112,10 @@ export function IntervalBooking({
         onDragStart={startExtendInterval}
         onDragEnd={endExtendInterval}
         onDrag={moveInterval}
-        className={`interval absolute border-r-2 h-14 mt-1 flex justify-between ${
+        className={`interval absolute border-r-2 h-14 mt-1 flex justify-between group ${
           mouseValue != 0
-            ? 'cursor-grabbing bg-cyan-300'
-            : 'cursor-grab bg-cyan-400'
+            ? 'cursor-grabbing ' + color + ' bg-opacity-60'
+            : 'cursor-grab ' + color + ' '
         }`}
         onClick={() => setTooltip(!tooltip)}
         style={{
@@ -128,7 +131,9 @@ export function IntervalBooking({
           onDragStart={startExtendInterval}
           onDragEnd={endExtendInterval}
           onDrag={extendInterval}
-        ></div>
+        >
+          <MoreVertSharpIcon fontSize="medium" />
+        </div>
       </div>
     </>
   );
