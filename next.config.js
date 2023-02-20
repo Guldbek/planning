@@ -25,6 +25,7 @@ module.exports = getConfig({
   publicRuntimeConfig: {
     NODE_ENV: process.env.NODE_ENV,
     API_URL: process.env.API_URL,
+    MAPBOX_TOKEN: process.env.MAPBOX_ACCESS_TOKEN,
   },
   /** We run eslint as a separate task in CI */
   eslint: { ignoreDuringBuilds: !!process.env.CI },
