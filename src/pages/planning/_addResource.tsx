@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 
-import { Project, ProjectResource, Resource } from '@prisma/client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
 import { getResources, createProjectResources } from '../api/strapi';

@@ -3,7 +3,6 @@
 
 import { DateTime } from 'luxon';
 import { FormEvent, useState } from 'react';
-import { trpc } from '~/utils/trpc';
 import { toast } from 'react-toastify';
 
 export function AddProject(props) {
@@ -12,22 +11,22 @@ export function AddProject(props) {
     setShowProjectAdd(value);
   }
 
-  const utils = trpc.useContext();
-  const mutation = trpc.project.add.useMutation();
-  const createProject = (newProject) => {
-    mutation.mutate(
-      { ...newProject },
-      {
-        onError: () => {
-          toast.error('Error');
-        },
-        onSuccess: () => {
-          toast.success('Tilføjede et nyt projekt');
-          utils.project.list.refetch();
-        },
-      },
-    );
-  };
+  // const utils = trpc.useContext();
+  // const mutation = trpc.project.add.useMutation();
+  // const createProject = (newProject) => {
+  //   mutation.mutate(
+  //     { ...newProject },
+  //     {
+  //       onError: () => {
+  //         toast.error('Error');
+  //       },
+  //       onSuccess: () => {
+  //         toast.success('Tilføjede et nyt projekt');
+  //         utils.project.list.refetch();
+  //       },
+  //     },
+  //   );
+  // };
 
   function onSubmitHandler(ev: FormEvent<HTMLFormElement>) {
     ev.preventDefault();

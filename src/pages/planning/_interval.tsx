@@ -5,7 +5,6 @@ import type { dbInterval } from '@/hooks/useBooking';
 import { DateTime, Interval } from 'luxon';
 import { useRef, useState } from 'react';
 import styles from '~/styles/Interval.module.css';
-import { trpc } from '~/utils/trpc';
 import MoreVertSharpIcon from '@mui/icons-material/MoreVertSharp';
 
 type Props = {

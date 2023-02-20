@@ -4,7 +4,6 @@ import { intervalFromDates } from '../helpers/intervalFromDates';
 import Header from './_header';
 import Project from './_project';
 import { AddProject } from './_addProject';
-import type { Project as ProjectType } from '@prisma/client';
 import { getProjects } from '../api/strapi';
 import { useQuery } from '@tanstack/react-query';
 

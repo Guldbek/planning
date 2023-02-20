@@ -3,7 +3,6 @@ import type { AppType, AppProps } from 'next/app';
 import type { ReactElement, ReactNode } from 'react';
 import { DefaultLayout } from '~/components/DefaultLayout';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { trpc } from '~/utils/trpc';
 import '~/styles/globals.css';
 
 export type NextPageWithLayout<
@@ -31,4 +30,4 @@ const MyApp = (({ Component, pageProps }: AppPropsWithLayout) => {
   return getLayout(<Component {...pageProps} />);
 }) as AppType;
 
-export default trpc.withTRPC(MyApp);
+export default MyApp;

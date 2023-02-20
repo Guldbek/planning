@@ -16,12 +16,6 @@ import Day from './_day';
 import ExpandMoreSharpIcon from '@mui/icons-material/ExpandMoreSharp';
 import ExpandLessSharpIcon from '@mui/icons-material/ExpandLessSharp';
 
-import type {
-  Project as ProjectType,
-  ProjectResource,
-  ProjectStartInterval,
-} from '@prisma/client';
-
 import {
   getProjectStartIntervals,
   createProjectStartIntervals,

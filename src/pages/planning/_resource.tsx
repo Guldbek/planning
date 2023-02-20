@@ -5,7 +5,6 @@ import {
   fromBookingIntervals,
   checkIfDateExistsInIntervals,
 } from '../helpers/intervalFromDates';
-import type { ResourceType } from '.';
 import { useState } from 'react';
 import Day from './_day';
 import { useBooking } from '~/hooks/useBooking';
