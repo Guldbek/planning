@@ -7,6 +7,8 @@ import { AddProject } from './_addProject';
 import { getProjects } from '../api/strapi';
 import { useQuery } from '@tanstack/react-query';
 
+import type { Project as ProjectType } from '../api/strapi';
+
 export default function Planning() {
   const {
     isLoading,

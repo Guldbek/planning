@@ -1,4 +1,13 @@
-export const getProjects = async () => {
+export type Project = {
+  id: number;
+  attributes: {
+    name: string;
+    hoursAvailable: number;
+    address: string;
+  };
+};
+
+export const getProjects = async (): Promise<Project[]> => {
   const res = await fetch('http://localhost:1337/api/projects', {
     headers: {
       Authorization:
@@ -34,15 +43,18 @@ export const getResourceStartIntervals = async (projectResourceId: number) => {
 };
 
 export const createResourceStartIntervals = async (data) => {
-  const res = await fetch(`http://localhost:1337/api/resource-start-intervals`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization:
-        'Bearer d2cde11a6ebc82425b230da01fda186b93ce0d79c5555f034044a3f48b803d2f82f9ac61d1f37261c79b30c21bb86ab21ba502f73d16dee204074e3acb0b7502d78d2297c1ad4dc0fcd3242103ddcf9420269c083190107c6b30455f1b52dae3712c3120dcc71ca19447383bdcc261464240ccc77e52cc02b1604f16c242d871',
+  const res = await fetch(
+    `http://localhost:1337/api/resource-start-intervals`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          'Bearer d2cde11a6ebc82425b230da01fda186b93ce0d79c5555f034044a3f48b803d2f82f9ac61d1f37261c79b30c21bb86ab21ba502f73d16dee204074e3acb0b7502d78d2297c1ad4dc0fcd3242103ddcf9420269c083190107c6b30455f1b52dae3712c3120dcc71ca19447383bdcc261464240ccc77e52cc02b1604f16c242d871',
+      },
+      body: JSON.stringify(data),
     },
-    body: JSON.stringify(data),
-  });
+  );
   return res.json();
 };
 
@@ -61,7 +73,6 @@ export const updateResourceStartIntervals = async (data) => {
   );
   return res.json();
 };
-
 
 export const createProjectStartIntervals = async (data) => {
   const res = await fetch(`http://localhost:1337/api/project-start-intervals`, {
@@ -130,4 +141,3 @@ export const createProjectResources = async (data) => {
   );
   return res.json();
 };
-
