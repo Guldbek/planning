@@ -4,9 +4,9 @@
 import { Project, ProjectResource, Resource } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import Select from 'react-select';
-import { number } from 'zod';
 import { toast } from 'react-toastify';
-import { trpc } from '~/utils/trpc';
+import { getResources, createProjectResources } from '../api/strapi';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 type Props = {
   project: Project;
@@ -15,29 +15,30 @@ type Props = {
 export function AddResource({ project }: Props) {
   const [selected, setSelected] = useState<Resource>();
   const [resources, setResources] = useState<Resource[]>([]);
+  const queryClient = useQueryClient();
 
-  const { loading: resourceLoading } = trpc.resource.list.useQuery(
-    {},
+  const { loading: resourceLoading } = useQuery(
+    ['resources'],
+    () => getResources(),
     {
-      onSuccess(data) {
-        setResources(data.items);
+      onSuccess: (data) => {
+        setResources(data.data);
       },
     },
   );
-  const mutation = trpc.projectResource.add.useMutation();
-  const utils = trpc.useContext();
+
+  const createMutation = useMutation({
+    mutationFn: (data) => createProjectResources(data),
+  });
 
   const handleSelected = (selected: Resource) => {
     setSelected(null);
-    mutation.mutate(
-      { projectId: project.id, resourceId: selected.id },
+    createMutation.mutate(
+      { data: { project: project.id, resource: selected.id } },
       {
         onSuccess: () => {
-          utils.projectResource.list.refetch({ projectId: project.id });
           toast.success('Tilføjede medarbejer til projektet');
-        },
-        onError: () => {
-          toast('Wow so easy!');
+          queryClient.refetchQueries(['projectResources', project.id]);
         },
       },
     );
@@ -51,7 +52,7 @@ export function AddResource({ project }: Props) {
           options={resources}
           isSearchable={true}
           isClearable={true}
-          getOptionLabel={(option) => option.name}
+          getOptionLabel={(option) => option.attributes.name}
           className={'rounded-none'}
           value={selected}
           placeholder={'Vælg medarbejder'}

@@ -5,15 +5,19 @@ import {
   fromBookingIntervals,
   checkIfDateExistsInIntervals,
 } from '../helpers/intervalFromDates';
-import type { ResourceType, StartIntervalType } from '.';
-import { useMemo, useState } from 'react';
+import type { ResourceType } from '.';
+import { useState } from 'react';
 import Day from './_day';
 import { useBooking } from '~/hooks/useBooking';
 import { Interval } from 'luxon';
-import { trpc } from '~/utils/trpc';
 import { IntervalBooking } from './_interval';
-import { ResourceStartInterval } from '@prisma/client';
 import { toast } from 'react-toastify';
+import {
+  getResourceStartIntervals,
+  createResourceStartIntervals,
+  updateResourceStartIntervals,
+} from '../api/strapi';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 type PropsType = {
   weeks: any;
@@ -23,79 +27,108 @@ type PropsType = {
 };
 
 export default function Resource(props: PropsType) {
-  const { weeks, dayWidth, resource, viewDate } = props;
+  const { weeks, dayWidth, projectResource, viewDate } = props;
 
-  const { loading } = trpc.resourceStartInterval.list.useQuery(
-    { projectResourceId: resource.id },
+  const [intervals, setIntervals] = useState<Interval[]>([]);
+  const [hours, setHours] = useState<number>(0);
+
+  let hoursTest = 0;
+  intervals.map((interval) => {
+    hoursTest = hoursTest + interval.interval.count('days') * 7.5;
+  });
+
+  const queryClient = useQueryClient();
+
+  useQuery(
+    ['resourceStartIntervals', projectResource.id],
+    () => getResourceStartIntervals(projectResource.id),
     {
-      onSuccess(data) {
+      onSuccess: (data) => {
         setIntervals(
-          data.items.map((interval) => fromBookingIntervals(interval)),
+          data.data.map((interval) => fromBookingIntervals(interval)),
         );
       },
     },
   );
 
-  const resourceStartIntervalMutate =
-    trpc.resourceStartInterval.update.useMutation();
-  const utils = trpc.useContext();
+  const updateMutation = useMutation({
+    mutationFn: (data) => updateResourceStartIntervals(data),
+  });
 
   const updateResourceStartInterval = (
-    resourceStartInterval: ResourceStartInterval,
+    resourceStartInterval: ProjectStartInterval,
   ) => {
-    resourceStartIntervalMutate.mutate(
+    updateMutation.mutate(
       {
         id: resourceStartInterval.id,
-        startDate: resourceStartInterval.startDate,
-        endDate: resourceStartInterval.endDate,
+        data: {
+          startDate: resourceStartInterval.attributes.startDate,
+          endDate: resourceStartInterval.attributes.endDate,
+        },
       },
       {
-        onSuccess: () => {
-          utils.resourceStartInterval.list.refetch({
-            projectResourceId: resource.id,
-          });
-          toast.success('Opdaterede booking');
+        onSuccess: (data) => {
+          queryClient.setQueryData(
+            ['resourceStartIntervals', projectResource.id],
+            data,
+          );
+          toast.success('Booking opdateret');
         },
       },
     );
   };
 
-  const mutation = trpc.resourceStartInterval.add.useMutation();
+  const mutation = useMutation({
+    mutationFn: (data) => createResourceStartIntervals(data),
+  });
 
-  function wrapperProjectInterval(intervalData) {
+  function wrapperResourceInterval(intervalData) {
     mutation.mutate(
       {
-        projectResourceId: resource.id,
-        startDate: intervalData.startDate,
-        endDate: intervalData.endDate,
+        data: {
+          project_resource: projectResource.id,
+          startDate: intervalData.attributes.startDate,
+          endDate: intervalData.attributes.endDate,
+        },
       },
       {
-        onSuccess: () => {
-          utils.resourceStartInterval.list.refetch({
-            projectResourceId: resource.id,
-          });
+        onSuccess: (data) => {
+          queryClient.setQueryData(
+            ['resourceStartIntervals', projectResource.id],
+            data,
+          );
         },
       },
     );
   }
 
-  const [intervals, setIntervals] = useState<Interval[]>([]);
   const [
     bookingEnabled,
     bookingInterval,
     onClickBookingStart,
     onHoverBooking,
     onClickBookingEnd,
-  ] = useBooking(wrapperProjectInterval, setIntervals, intervals);
+  ] = useBooking(wrapperResourceInterval, setIntervals, intervals);
 
   return (
     <>
       <div className="flex flex-row hover:bg-zinc-100">
         <div className="w-1/5 border-r-4 p-2 flex justify-end z-10 bg-white items-center">
-          <p className="mr-3">{resource.Resource.name}</p>
+          <div className="mr-3">
+            <p className="text-xs text-right">
+              {projectResource.attributes.resource.data.attributes.name}
+            </p>
+            <p className="text-xs text-right text-green-500">
+              <span className="font-bold">
+                {Math.floor(Math.random() * 100)}
+              </span>
+              /{hoursTest}
+            </p>
+          </div>
+
           <img
-            src={`https://fakeface.rest/face/view/${resource.Resource.name}?gender=male`}
-            className="w-10 h-10 rounded-3xl"
+            src={`https://fakeface.rest/face/view/${projectResource.attributes.resource.data.attributes.name}?gender=male`}
+            className="w-8 h-8 rounded-3xl"
           />
         </div>
         <div className="w-4/5 flex flex-row border-b-2 relative">

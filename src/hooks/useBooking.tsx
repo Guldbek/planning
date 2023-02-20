@@ -63,12 +63,6 @@ export function useBooking(
       ...newInterval,
     });
 
-    // intervals
-    //   .filter((dbInterval) => dbInterval.interval.overlaps(interval.interval))
-    //   .map((overlappingIntervals) =>
-    //     console.log('delete interval' + overlappingIntervals.id),
-    //   );
-
     toast.success('Ny booking tilføjet');
     setIntervals([...intervals, interval]);
     setBookingEnabled(false);

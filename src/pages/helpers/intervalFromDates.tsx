@@ -74,8 +74,9 @@ export type BookingInterval = {
 export function fromBookingIntervals(
   interval: ObjectInterval,
 ): BookingInterval {
-  const now = DateTime.fromJSDate(interval.startDate);
-  const later = DateTime.fromJSDate(interval.endDate).endOf('day');
+  console.log(interval);
+  const now = DateTime.fromISO(interval.attributes.startDate);
+  const later = DateTime.fromISO(interval.attributes.endDate).endOf('day');
   const DateTimeInterval = Interval.fromDateTimes(now, later);
 
   return { id: interval.id, interval: DateTimeInterval };
@@ -100,12 +101,14 @@ export function checkIfDateExistsInIntervals(
 export function createObjectInterval(
   first: DateTime,
   second: DateTime,
-): { startDate: Date; endDate: Date } {
+): { attributes: { startDate: string; endDate: string } } {
   const startDate = first <= second ? first : second;
   const endDate = first >= second ? first : second;
 
   return {
-    startDate: startDate?.toJSDate(),
-    endDate: endDate?.toJSDate(),
+    attributes: {
+      startDate: startDate?.toISO(),
+      endDate: endDate?.toISO(),
+    },
   };
 }

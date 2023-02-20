@@ -13,8 +13,10 @@ datasource db {
 model Project {
   id               Int                    @id @default(autoincrement())
   name             String
+  hoursAvailable   Int?
   startIntervals   ProjectStartInterval[]
   ProjectResources ProjectResource[]
+  address          String?
 }
 
 model ProjectStartInterval {

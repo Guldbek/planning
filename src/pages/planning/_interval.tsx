@@ -23,6 +23,8 @@ export function IntervalBooking({
   dayWidth,
   updateInterval,
   color,
+  hours,
+  setHours,
 }: Props) {
   const [interval, setInterval] = useState<Interval>(dbInterval.interval);
   const diff = interval.start.diff(viewDate, 'days');
@@ -81,8 +83,10 @@ export function IntervalBooking({
     setStartInterval(interval);
     updateInterval({
       id: dbInterval.id,
-      startDate: interval.start.toJSDate(),
-      endDate: interval.end.toJSDate(),
+      attributes: {
+        startDate: interval.start.toISO(),
+        endDate: interval.end.toISO(),
+      },
     });
   };
 
@@ -112,7 +116,7 @@ export function IntervalBooking({
         onDragStart={startExtendInterval}
         onDragEnd={endExtendInterval}
         onDrag={moveInterval}
-        className={`interval absolute border-r-2 h-14 mt-1 flex justify-between group ${
+        className={`interval absolute border-r-2 h-10 mt-1 flex justify-between group ${
           mouseValue != 0
             ? 'cursor-grabbing ' + color + ' bg-opacity-60'
             : 'cursor-grab ' + color + ' '

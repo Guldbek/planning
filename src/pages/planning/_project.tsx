@@ -10,7 +10,6 @@ import { AddResource } from './_addResource';
 import { useState } from 'react';
 import { dbInterval, useBooking } from '~/hooks/useBooking';
 import { IntervalBooking } from './_interval';
-import { trpc } from '~/utils/trpc';
 import { toast } from 'react-toastify';
 import Resource from './_resource';
 import Day from './_day';
@@ -22,7 +21,14 @@ import type {
   ProjectResource,
   ProjectStartInterval,
 } from '@prisma/client';
-import type { Resource } from '@prisma/client';
+
+import {
+  getProjectStartIntervals,
+  createProjectStartIntervals,
+  updateProjectStartIntervals,
+  getProjectResources,
+} from '../api/strapi';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 type PropsType = {
   weeks: any;
@@ -38,65 +44,74 @@ export default function Project(props: PropsType) {
   const [intervals, setIntervals] = useState<dbInterval[]>();
   const [projectResources, setProjectResources] = useState<ProjectResource[]>();
 
-  trpc.projectStartInterval.list.useQuery(
-    { projectId: project.id },
+  const queryClient = useQueryClient();
+
+  useQuery(
+    ['projectStartIntervals', project.id],
+    () => getProjectStartIntervals(project.id),
     {
-      onSuccess(data) {
+      onSuccess: (data) => {
         setIntervals(
-          data.items.map((interval) => fromBookingIntervals(interval)),
+          data.data.map((interval) => fromBookingIntervals(interval)),
         );
       },
     },
   );
 
-  const projectIntervalMutation =
-    trpc.projectStartInterval.update.useMutation();
-  const utils = trpc.useContext();
+  const updateMutation = useMutation({
+    mutationFn: (data) => updateProjectStartIntervals(data),
+  });
 
   const updateProjectStartInterval = (
     projectStartInterval: ProjectStartInterval,
   ) => {
-    projectIntervalMutation.mutate(
+    updateMutation.mutate(
       {
         id: projectStartInterval.id,
-        startDate: projectStartInterval.startDate,
-        endDate: projectStartInterval.endDate,
+        data: {
+          startDate: projectStartInterval.attributes.startDate,
+          endDate: projectStartInterval.attributes.endDate,
+        },
       },
       {
-        onSuccess: () => {
-          utils.projectStartInterval.list.refetch({ projectId: project.id });
-          toast.success('Opdaterede booking');
+        onSuccess: (data) => {
+          queryClient.setQueryData(['projectStartIntervals', project.id], data);
+          toast.success('Booking opdateret');
         },
       },
     );
   };
 
-  const { refetch: refetchProjectResources } =
-    trpc.projectResource.list.useQuery(
-      { projectId: project.id },
-      {
-        onSuccess(data) {
-          setProjectResources(data.items);
-        },
-      },
-    );
-
-  const mutation = trpc.projectStartInterval.add.useMutation();
+  const mutation = useMutation({
+    mutationFn: (data) => createProjectStartIntervals(data),
+  });
 
   function wrapperProjectInterval(intervalData) {
     mutation.mutate(
       {
-        projectId: project.id,
-        startDate: intervalData.startDate,
-        endDate: intervalData.endDate,
+        data: {
+          project: project.id,
+          startDate: intervalData.attributes.startDate,
+          endDate: intervalData.attributes.endDate,
+        },
       },
       {
-        onSuccess: () => {
-          utils.projectStartInterval.list.refetch({ projectId: project.id });
+        onSuccess: (data) => {
+          queryClient.setQueryData(['projectStartIntervals', project.id], data);
         },
       },
     );
   }
+
+  useQuery(
+    ['projectResources', project.id],
+    () => getProjectResources(project.id),
+    {
+      onSuccess: (data) => {
+        setProjectResources(data.data);
+      },
+    },
+  );
 
   const [
     bookingEnabled,
@@ -109,11 +124,8 @@ export default function Project(props: PropsType) {
   return (
     <>
       <div className="flex flex-row hover:bg-zinc-100">
-        <div className="w-1/5 border-r-4 border-b-2 border-t-4 p-2 flex justify-between z-10 bg-white items-center">
-          <div>
-            {project.name}
-            <p className="text-xs"></p>
-          </div>
+        <div className="w-1/5 border-r-4 border-t-4 p-2 flex justify-between z-10 bg-white items-center">
+          <div>{project.attributes.name}</div>
           <button
             onClick={() => setShowResources(!showResources)}
             className="cursor-pointer"
@@ -132,7 +144,6 @@ export default function Project(props: PropsType) {
               color={'bg-cyan-400'}
             />
           ))}
-
           {weeks &&
             weeks.map((week, index) => (
               <div
@@ -175,7 +186,7 @@ export default function Project(props: PropsType) {
         projectResources.map((resource, index) => (
           <Resource
             key={index}
-            resource={resource}
+            projectResource={resource}
             dayWidth={dayWidth}
             weeks={weeks}
             project={project}
@@ -183,11 +194,9 @@ export default function Project(props: PropsType) {
           />
         ))}
       {showResources && (
-        <AddResource
-          project={project}
-          refetchProjectResources={refetchProjectResources}
-          projectResources={projectResources}
-        />
+        <>
+          <AddResource project={project} projectResources={projectResources} />
+        </>
       )}
     </>
   );

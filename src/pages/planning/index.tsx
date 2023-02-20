@@ -5,10 +5,16 @@ import Header from './_header';
 import Project from './_project';
 import { AddProject } from './_addProject';
 import type { Project as ProjectType } from '@prisma/client';
-import { trpc } from '~/utils/trpc';
+import { getProjects } from '../api/strapi';
+import { useQuery } from '@tanstack/react-query';
 
 export default function Planning() {
-  const { data, isLoading: loading } = trpc.project.list.useQuery();
+  const {
+    isLoading,
+    error,
+    data: result,
+  } = useQuery(['projects'], getProjects);
+
   const [startDate, setStartDate] = useState<DateTime>(
     DateTime.now().startOf('week'),
   );
@@ -16,8 +22,6 @@ export default function Planning() {
   const [projects, setProjects] = useState<ProjectType[]>();
   const later = startDate.plus({ months: 4 }).endOf('week').endOf('day');
   const interval = Interval.fromDateTimes(startDate, later);
-
-  if (loading) return <p>Loading...</p>;
 
   const weeks = intervalFromDates(interval).weeks();
 
@@ -30,8 +34,8 @@ export default function Planning() {
         setStartDate={setStartDate}
         setDayWidth={setDayWidth}
       />
-      {!loading &&
-        data.items.map((project, index) => (
+      {!isLoading &&
+        result.data.map((project, index) => (
           <Project
             key={`${project.name}${index + 1}`}
             weeks={weeks}

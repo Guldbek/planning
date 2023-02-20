@@ -15,6 +15,8 @@ import { prisma } from '~/server/prisma';
 const defaultProjectSelect = Prisma.validator<Prisma.ProjectSelect>()({
   id: true,
   name: true,
+  hoursAvailable: true,
+  address: true,
 });
 
 export const projectRouter = router({
