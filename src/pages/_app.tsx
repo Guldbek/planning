@@ -2,7 +2,11 @@ import type { NextPage } from 'next';
 import type { AppType, AppProps } from 'next/app';
 import type { ReactElement, ReactNode } from 'react';
 import { DefaultLayout } from '~/components/DefaultLayout';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  ReactQueryDeveloper,
+} from '@tanstack/react-query';
 import '~/styles/globals.css';
 
 export type NextPageWithLayout<

@@ -1,13 +1,26 @@
+export type ProjectResult = {
+  data: Project[];
+  meta: {
+    pagination: {
+      page: 1;
+      pageCount: 1;
+      pageSize: 25;
+      total: 2;
+    };
+  };
+};
+
 export type Project = {
   id: number;
   attributes: {
     name: string;
     hoursAvailable: number;
     address: string;
+    deadline: string;
   };
 };
 
-export const getProjects = async (): Promise<Project[]> => {
+export const getProjects = async (): Promise<ProjectResult> => {
   const res = await fetch('http://localhost:1337/api/projects', {
     headers: {
       Authorization:

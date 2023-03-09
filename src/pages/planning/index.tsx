@@ -7,24 +7,26 @@ import { AddProject } from './_addProject';
 import { getProjects } from '../api/strapi';
 import { useQuery } from '@tanstack/react-query';
 
-import type { Project as ProjectType } from '../api/strapi';
+import type { ProjectResult as ProjectResultType } from '../api/strapi';
 
 export default function Planning() {
-  const {
-    isLoading,
-    error,
-    data: result,
-  } = useQuery(['projects'], getProjects);
-
   const [startDate, setStartDate] = useState<DateTime>(
     DateTime.now().startOf('week'),
   );
   const [dayWidth, setDayWidth] = useState<number>(24);
-  const [projects, setProjects] = useState<ProjectType[]>();
+  const [projects, setProjects] = useState<ProjectResultType>();
   const later = startDate.plus({ months: 4 }).endOf('week').endOf('day');
   const interval = Interval.fromDateTimes(startDate, later);
 
   const weeks = intervalFromDates(interval).weeks();
+
+  const { isLoading } = useQuery(['projects'], getProjects, {
+    onSuccess: (data) => {
+      setProjects(data);
+    },
+  });
+
+  if (isLoading) return <p>Loading...</p>;
 
   return (
     <>
@@ -35,10 +37,10 @@ export default function Planning() {
         setStartDate={setStartDate}
         setDayWidth={setDayWidth}
       />
-      {!isLoading &&
-        result.data.map((project, index) => (
+      {projects &&
+        projects.data.map((project, index) => (
           <Project
-            key={`${project.name}${index + 1}`}
+            key={`${project.attributes.name}${index + 1}`}
             weeks={weeks}
             dayWidth={dayWidth}
             viewDate={startDate}

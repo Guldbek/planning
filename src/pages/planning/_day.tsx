@@ -28,6 +28,7 @@ export default function Day(props: PropsType) {
     dateTime,
     isInBookingInterval,
     bookingIntervalCount,
+    day,
   } = props;
   const dayRef = useRef(null);
   const [showToolTip, setShowToolTip] = useState(false);
@@ -67,8 +68,8 @@ export default function Day(props: PropsType) {
         onMouseEnter={() => onHoverHandler()}
         onMouseLeave={() => setShowToolTip(false)}
         className={`cursor-pointer h-12 text-center border-r-2 ${
-          isInBookingInterval ? color : ''
-        }`}
+          day.weekday > 5 ? 'bg-slate-100' : ''
+        }     ${isInBookingInterval ? color : ''}`}
         style={{ width: dayWidth }}
       ></div>
     </div>

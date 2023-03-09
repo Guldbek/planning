@@ -15,6 +15,7 @@ import Resource from './_resource';
 import Day from './_day';
 import ExpandMoreSharpIcon from '@mui/icons-material/ExpandMoreSharp';
 import ExpandLessSharpIcon from '@mui/icons-material/ExpandLessSharp';
+import type { Project as ProjectType } from '../api/strapi';
 
 import {
   getProjectStartIntervals,
@@ -37,6 +38,9 @@ export default function Project(props: PropsType) {
   const [showResources, setShowResources] = useState<boolean>(false);
   const [intervals, setIntervals] = useState<dbInterval[]>();
   const [projectResources, setProjectResources] = useState<ProjectResource[]>();
+  const projectDeadlineDiffDays = DateTime.fromISO(
+    project.attributes.deadline,
+  ).diff(viewDate, 'days').days;
 
   const queryClient = useQueryClient();
 
@@ -69,7 +73,7 @@ export default function Project(props: PropsType) {
       },
       {
         onSuccess: (data) => {
-          queryClient.setQueryData(['projectStartIntervals', project.id], data);
+          queryClient.invalidateQueries(['projectStartIntervals']);
           toast.success('Booking opdateret');
         },
       },
@@ -118,7 +122,7 @@ export default function Project(props: PropsType) {
   return (
     <>
       <div className="flex flex-row hover:bg-zinc-100">
-        <div className="w-1/5 border-r-4 border-t-4 p-2 flex justify-between z-10 bg-white items-center">
+        <div className="w-1/5 border-r-4 border-t-4 p-2 flex justify-between z-10 bg-white items-center text-sm">
           <div>{project.attributes.name}</div>
           <button
             onClick={() => setShowResources(!showResources)}
@@ -138,6 +142,15 @@ export default function Project(props: PropsType) {
               color={'bg-cyan-400'}
             />
           ))}
+          {project.attributes.deadline && (
+            <div
+              className="absolute w-2 h-10 bg-red-500 mt-1"
+              style={{
+                left: `${projectDeadlineDiffDays * dayWidth}px`,
+                zIndex: '1',
+              }}
+            ></div>
+          )}
           {weeks &&
             weeks.map((week, index) => (
               <div
@@ -156,6 +169,7 @@ export default function Project(props: PropsType) {
                       index={index}
                       color={'bg-cyan-400'}
                       dateTime={day}
+                      day={day}
                       dayWidth={dayWidth}
                       isInInterval={
                         intervals &&

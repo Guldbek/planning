@@ -159,6 +159,7 @@ export default function Resource(props: PropsType) {
                       index={index}
                       color={'bg-rose-400'}
                       dateTime={day}
+                      day={day}
                       dayWidth={dayWidth}
                       isInInterval={
                         intervals &&
